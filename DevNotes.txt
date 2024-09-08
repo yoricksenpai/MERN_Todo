@@ -1,0 +1,61 @@
+L'application contiendra 7 pages :
+-- La page principale
+-- La page de modification de taches
+-- La page de creation de taches
+-- et la page d'ajout des caétgories
+-- Connexion
+-- Enregistrement
+-- reinitialisation du mot de passe
+
+*-- La page principale, contiendra une option de : 
+** Creation (redirection vers la page de creation de taches)
+** d'affichage de taches
+** Tri et filtrage des taches en fonction de leur date d'écheance, de l'ordre alphabetique et par leur categorie ainsi qu'a leur etat
+    *-* chaque tache aura une option de:
+            booléen qui affirme si la tache
+            suppression de taches
+            modification de taches (redirection vers la page de creation de taches)
+*-- La page de creation de taches, contiendra une option de :
+    nom
+    description
+    date d'echeance
+    categorie unique
+
+*-- La page de modification de taches, sera similaire à la page de creation dans le but de simplifier les attributs precedents
+*-- La page d'ajout de categories( et de suppression )
+
+
+Au niveau du frontend : 
+Un composant général pour chaque page
+
+Page principale 
+-composant liste de taches
+    -- composant taches ( le composant tache suffira comme bouton sur lui meme pour le modifier)
+        -- composant bouton (^pour l'option de suppression )
+         -composant checkbox( pour la precision du terminé)
+-composant etiquette ( etiquettes des categories, etiquettes faits, non faits et arrivée a écheance)
+- composant bouton ( pour la redirection vers page de creation )
+
+Pour le backend
+-Modelès : 
+        Utilisateur
+        taches
+        Categories
+-Routes : 
+        routes de creation ( utilisateurs et taches et categories )
+        routes de recupération de données ( nom de l'utilisateur sur le header du dashboard et des infos des et de la taches)
+        route de modification de la tache
+        route de suppression de la tache et categories
+-Midlewares 
+        midleware d'authentification
+-Config : 
+        Configuration de la base de données MongogDB
+Codes d'integrations du backend sur le frontend dans le dossier api de src
+code de l'url api
+        
+
+
+Pour toute l'application , un header ( contenant le nom de l'application permettant de retourner a la main page. Si l'utilisateur n'est pas connecté le header aura un bouton login et register, mais si c'est le cas , un bouton de creation de taches et le nom de l'utilisateur) et un footer contenant l'année de creation, la version de l'app ainsi que les identifiants linkedIn et github du createur (moi))
+
+
+- Les filtres en categories ne filtres pas
