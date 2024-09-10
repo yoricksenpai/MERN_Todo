@@ -7,18 +7,28 @@ import taskListRoutes from './routes/taskListRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import initScheduledTasks from './schedulers/reminderScheduler.js';
 import connectDB from './config/dbConfig.js'
-import nodemailer from 'nodemailer';
 import cors from 'cors';
 connectDB();
 
 const app = express();
 
+
+const isProd = env.NODE_ENV === 'production';
+
+// Configuration CORS conditionnelle
+const corsOptions = {
+  origin: isProd 
+    ? 'https://mern-todo-iota-six.vercel.app' 
+    : 'http://localhost:5173',
+  credentials: true
+};
+
 // Middleware pour parser le JSON dans le corps des requêtes
 app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:5173', // L'URL de votre frontend Vite
-  credentials: true
-}));
+
+// Application du middleware CORS avec les options conditionnelles
+app.use(cors(corsOptions));
+
 
 
 // Middleware pour parser les cookies
@@ -38,16 +48,6 @@ app.use('/cat', categoryRoutes);
 //Utiliser les routes pour les listes de tâches
 app.use('/tl', taskListRoutes);
 
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // Utilisation du service Gmail
-  auth: {
-    user: 'iwomirecovery@gmail.com', // Votre adresse email
-    pass: 'yxqn mmah lyju fojw' // Votre mot de passe (vous devrez le remplacer)
-  }
-});
  
 // Initialiser les tâches planifiées
 initScheduledTasks();
