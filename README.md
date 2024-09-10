@@ -25,7 +25,6 @@ TodoApp-Vite React est une application de gestion de tâches (todolist) basée s
 ## Installation
 
 ### Backend
-
 1. Naviguez vers le dossier backend :
    ```
    cd backend
@@ -47,7 +46,6 @@ TodoApp-Vite React est une application de gestion de tâches (todolist) basée s
    ```
 
 ### Frontend
-
 1. Naviguez vers le dossier racine du projet (si vous êtes dans le dossier backend) :
    ```
    cd ..
@@ -96,7 +94,6 @@ TodoApp-Vite React est une application de gestion de tâches (todolist) basée s
 - LinkedIn : [https://www.linkedin.com/in/johan-yorick-priso-1ba271285/](https://www.linkedin.com/in/johan-yorick-priso-1ba271285/)
 
 ## Version
-
 0.0.0
 
 ## Licence
