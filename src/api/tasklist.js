@@ -1,6 +1,11 @@
 // taskListService.js
 
-const API_URL = '/api'; // Utilise le proxy de Vite
+import {env} from 'node:process'
+
+const isProd = env.NODE_ENV === 'production'
+
+
+const API_URL = isProd ?'https://mern-todo-backend-nine-sigma.vercel.app/': '/api'; 
 
 // Fonction utilitaire pour gérer les erreurs
 const handleResponse = async (response) => {
@@ -38,7 +43,7 @@ export const updateTaskList = async (id, name, description) => {
 
 export const removeTaskFromList = async (listId, taskId) => {
   try {
-    const response = await fetch(`/api/tasklists/${listId}/tasks/${taskId}`, {
+    const response = await fetch(`${API_URL}/tasklists/${listId}/tasks/${taskId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +67,7 @@ export const deleteTaskList = async (id) => {
 };
 
 export const shareTaskList = async (listId, email, permissions) => {
-  const response = await fetch(`/api/tl/${listId}/share`, {
+  const response = await fetch(`${API_URL}/tl/${listId}/share`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -89,7 +94,7 @@ export const unshareTaskList = async (id, userId) => {
 };
 
 export const getTasksForList = async (listId) => {
-  const response = await fetch(`/api/tl/tasklist/${listId}/tasks`, {
+  const response = await fetch(`${API_URL}/tl/tasklist/${listId}/tasks`, {
     method: 'GET',
     credentials: 'include', // Pour inclure les cookies dans la requête
   });
@@ -126,7 +131,7 @@ export const addTaskToList = async (listId, taskId) => {
     return response.json();
 };
 export const deleteTaskFromList = async (listId, taskId) => {
-  const response = await fetch(`/api/tl/tasklist/${listId}/task/${taskId}`, {
+  const response = await fetch(`${API_URL}/tl/tasklist/${listId}/task/${taskId}`, {
     method: 'DELETE',
   });
   if (!response.ok) {
