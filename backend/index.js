@@ -13,7 +13,6 @@ connectDB();
 
 const app = express();
 
-const isProd = env.NODE_ENV === 'production';
 
 // Configuration CORS améliorée
 const allowedOrigins = ['http://localhost:5173', 'https://mern-todo-iota-six.vercel.app'];
