@@ -6,7 +6,6 @@ const targetUrl = env.NODE_ENV === 'production'
   ? 'https://mern-todo-backend-nine-sigma.vercel.app/'
   : 'http://localhost:3000/'
 
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
