@@ -16,16 +16,26 @@ const app = express();
 const isProd = env.NODE_ENV === 'production';
 
 // Configuration CORS améliorée
+// CORS Configuration
 const corsOptions = {
-  origin: isProd 
-    ? ['https://mern-todo-iota-six.vercel.app', 'https://mern-todo-backend-nine-sigma.vercel.app']
-    : 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'https://mern-todo-iota-six.vercel.app'
+        ];
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 200
 };
 
-// Application du middleware CORS avant les autres middlewares
+// Application du middleware CORS avec les options
 app.use(cors(corsOptions));
 
 // Autres middlewares
