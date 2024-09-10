@@ -1,4 +1,6 @@
-const API_URL =  '/api'; // Utilise le proxy de Vite
+const isProd = import.meta.env.PROD // Vite fournit PROD, qui est true en production
+const API_URL ='/api'
+
 
 /**
  * A utility function to handle JSON responses from the server, and throw
@@ -183,7 +185,7 @@ export const toggleTaskNotifications = async (taskId, subscription) => {
 
 export const getTasksByCategory = async (categoryId) => {
   try {
-    const response = await fetch(`/api/tasks/by-category/${categoryId}`, {
+    const response = await fetch(`${API_URL}/tasks/by-category/${categoryId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
@@ -247,7 +249,7 @@ export const getTasksByStatus = async (completed) => {
 
 export const getTasksForList = async (taskListId) => {
   try {
-    const response = await fetch(`/api/tasklists/${taskListId}/tasks`, {
+    const response = await fetch(`${API_URL}/tasklists/${taskListId}/tasks`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },

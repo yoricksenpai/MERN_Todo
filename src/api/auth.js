@@ -1,5 +1,5 @@
-
-const API_URL =  '/api'; // Utilise le proxy de Vite
+const isProd = import.meta.env.PROD // Vite fournit PROD, qui est true en production
+const API_URL ='/api'
 
 /**
  * A utility function to handle JSON responses from the server, and throw
@@ -71,7 +71,7 @@ export const getProfile = async () => {
 
 export const fetchNotifications = async () => {
   try {
-    const response = await fetch('/api/auth/notifications', {
+    const response = await fetch(`${API_URL}/auth/notifications`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -89,7 +89,7 @@ export const fetchNotifications = async () => {
 
 export const dismissNotification = async (notificationId) => {
   try {
-    const response = await fetch(`/api/auth/notifications/${notificationId}/read`, {
+    const response = await fetch(`${API_URL}/auth/notifications/${notificationId}/read`, {
       method: 'POST',
       credentials: 'include', // Pour inclure les cookies dans la requête
       headers: {

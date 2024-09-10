@@ -1,4 +1,6 @@
-const API_URL =  '/api'; // Utilise le proxy de Vite
+const isProd = import.meta.env.PROD // Vite fournit PROD, qui est true en production
+const API_URL ='/api'
+
 
 
 /**
@@ -42,7 +44,7 @@ export const createCategory = async (categoryData) => {
  * response is ok, or rejects with an error if the response is not ok.
  */
 export const getCategoryById = async (categoryId) => {
-  const response = await fetch(`/cat/category/${categoryId}`, {
+  const response = await fetch(`${API_URL}/cat/category/${categoryId}`, {
     method: 'GET',
     credentials: 'include'
   });

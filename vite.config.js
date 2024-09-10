@@ -1,21 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import {env} from 'node:process'
 
-const targetUrl = env.NODE_ENV === 'production'
-  ? 'https://mern-todo-backend-nine-sigma.vercel.app/'
-  : 'http://localhost:3000/'
+const API_URL ='https://mern-todo-backend-nine-sigma.vercel.app' 
+ 
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-      server: {
-      proxy: {
-        '/api': {
-          target:targetUrl,
-              changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '')
-        }
+  server: {
+    proxy: {
+      '/api': {
+        target: API_URL,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
+  }
 })
