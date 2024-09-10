@@ -1,7 +1,6 @@
 import express from 'express';
 import { env } from 'node:process';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import taskListRoutes from './routes/taskListRoutes.js';
@@ -15,38 +14,42 @@ const app = express();
 
 const isProd = env.NODE_ENV === 'production';
 
-// Configuration CORS améliorée
-// CORS Configuration
-const corsOptions = {
-    origin: function (origin, callback) {
-        const allowedOrigins = [
-            'http://localhost:5173',
-            'https://mern-todo-iota-six.vercel.app'
-        ];
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    optionsSuccessStatus: 200
+// Middleware CORS personnalisé
+const allowCors = fn => async (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  return await fn(req, res);
 };
 
-// Application du middleware CORS avec les options
-app.use(cors(corsOptions));
+// Routes avec CORS appliqué
+const handler = (req, res) => {
+  const d = new Date();
+  res.end(d.toString());
+};
+
+app.use(allowCors((req, res) => {
+  // Vous pouvez gérer vos routes ici
+  res.send("Hello World!"); // Exemple de réponse
+}));
 
 // Autres middlewares
 app.use(express.json());
 app.use(cookieParser());
 
 // Routes
-app.use('/auth', authRoutes);
-app.use('/tasks', taskRoutes);
-app.use('/cat', categoryRoutes);
-app.use('/tl', taskListRoutes);
+app.use('/auth', allowCors(authRoutes));
+app.use('/tasks', allowCors(taskRoutes));
+app.use('/cat', allowCors(categoryRoutes));
+app.use('/tl', allowCors(taskListRoutes));
 
 // Initialiser les tâches planifiées
 initScheduledTasks();
