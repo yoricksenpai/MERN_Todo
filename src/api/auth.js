@@ -1,5 +1,9 @@
+import {env} from 'node:process'
 
-const API_URL =  '/api'; // Utilise le proxy de Vite
+const isProd = env.NODE_ENV === 'production'
+
+
+const API_URL = isProd ?'https://mern-todo-backend-nine-sigma.vercel.app/': '/api'; // Utilise le proxy de Vite
 
 /**
  * A utility function to handle JSON responses from the server, and throw
@@ -71,7 +75,7 @@ export const getProfile = async () => {
 
 export const fetchNotifications = async () => {
   try {
-    const response = await fetch('/api/auth/notifications', {
+    const response = await fetch(`${API_URL}/auth/notifications`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -89,7 +93,7 @@ export const fetchNotifications = async () => {
 
 export const dismissNotification = async (notificationId) => {
   try {
-    const response = await fetch(`/api/auth/notifications/${notificationId}/read`, {
+    const response = await fetch(`${API_URL}/auth/notifications/${notificationId}/read`, {
       method: 'POST',
       credentials: 'include', // Pour inclure les cookies dans la requête
       headers: {
