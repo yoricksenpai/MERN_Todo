@@ -1,4 +1,9 @@
-const API_URL =  '/api'; // Utilise le proxy de Vite
+import {env} from 'node:process'
+
+const isProd = env.NODE_ENV === 'production'
+
+
+const API_URL = isProd ?'https://mern-todo-backend-nine-sigma.vercel.app/': '/api'; // Utilise le proxy de Vite
 
 
 /**
@@ -42,7 +47,7 @@ export const createCategory = async (categoryData) => {
  * response is ok, or rejects with an error if the response is not ok.
  */
 export const getCategoryById = async (categoryId) => {
-  const response = await fetch(`/cat/category/${categoryId}`, {
+  const response = await fetch(`${API_URL}/cat/category/${categoryId}`, {
     method: 'GET',
     credentials: 'include'
   });
