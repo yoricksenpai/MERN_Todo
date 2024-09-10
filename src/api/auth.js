@@ -1,5 +1,5 @@
 const isProd = import.meta.env.PROD // Vite fournit PROD, qui est true en production
-const API_URL ='/api'
+const API_URL ='https://mern-todo-backend-nine-sigma.vercel.app' 
 
 /**
  * A utility function to handle JSON responses from the server, and throw
