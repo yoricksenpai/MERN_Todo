@@ -1,11 +1,8 @@
 // taskListService.js
-
-import {env} from 'node:process'
-
-const isProd = env.NODE_ENV === 'production'
-
-
-const API_URL = isProd ?'https://mern-todo-backend-nine-sigma.vercel.app/': '/api'; 
+const isProd = import.meta.env.PROD // Vite fournit PROD, qui est true en production
+const API_URL = isProd 
+  ? 'https://mern-todo-backend-nine-sigma.vercel.app/' 
+  : '/api'
 
 // Fonction utilitaire pour gérer les erreurs
 const handleResponse = async (response) => {
