@@ -48,29 +48,6 @@ const transporter = nodemailer.createTransport({
     pass: 'yxqn mmah lyju fojw' // Votre mot de passe (vous devrez le remplacer)
   }
 });
-
-app.use('/mail',async (req, res) => {
-    try {
-        const { email } = req.body;
-        const mailOptions = {
-      from: 'iwomirecovery@gmail.com',
-      to: email,
-      subject: 'Reset Password',
-      text: `You are receiving this email because you (or someone else) has requested the reset of the password for your account.\n\n
-             Please click on the following link, or paste it into your browser to complete the process:\n\n
-             $test\n\n
-             If you did not request this, please ignore this email and your password will remain unchanged. This link will expires in 1h\n`
-    };
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Password reset email sent' });
-    }
-    catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-  
-// Autres configurations de votre application...
  
 // Initialiser les tâches planifiées
 initScheduledTasks();
