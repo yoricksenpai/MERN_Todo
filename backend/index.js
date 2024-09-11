@@ -15,7 +15,7 @@ const app = express();
 
 
 // Configuration CORS améliorée
-const allowedOrigins = ['http://localhost:5173', 'https://mern-todo-iota-six.vercel.app'];
+const allowedOrigins = ['http://localhost:5173', 'https://mern-todo-iota-six.vercel.app', 'https://mern-todo-chi-gold.vercel.app/'];
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
