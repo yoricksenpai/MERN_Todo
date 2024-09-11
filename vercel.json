@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "https://mern-todo-sepia.vercel.app/$1"
+            "destination": "https://mern-todo-backend-psi.vercel.app/$1"
         },
         {
             "source": "/(.*)",

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const API_URL ='https://mern-todo-backend-nine-sigma.vercel.app' 
+const API_URL = "https://mern-todo-backend-psi.vercel.app/" 
  
 
 
