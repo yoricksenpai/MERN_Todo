@@ -1,11 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { Trash2, Edit2, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toggleTaskNotifications, toggleTaskCompletion } from '../api/task';
 
-const TaskComponent = ({ task, onTaskUpdate, onDelete }) => {
+// Définir l'interface pour une tâche
+interface Task {
+  _id: string;
+  title: string;
+  deadline: string;
+  completed: boolean;
+  notificationsEnabled: boolean;
+  // Ajoutez d'autres propriétés si nécessaire
+}
+
+interface TaskComponentProps {
+  task: Task;
+  onTaskUpdate: (task: Task) => void;
+  onDelete: (id: string) => Promise<void>;
+}
+
+const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDelete }) => {
   const navigate = useNavigate();
-  const [localTask, setLocalTask] = useState(task);
+  const [localTask, setLocalTask] = useState<Task>(task);
 
   // Mise à jour de la tâche locale lorsque la tâche passée en prop change
   useEffect(() => {
@@ -21,13 +37,11 @@ const TaskComponent = ({ task, onTaskUpdate, onDelete }) => {
     setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: newNotificationState }));
     
     try {
-      const updatedTask = await toggleTaskNotifications(localTask._id, {});
-      // Si la mise à jour a réussi, on met à jour l'état local
+      const updatedTask: Task = await toggleTaskNotifications(localTask._id, {});
       setLocalTask(updatedTask);
-      onTaskUpdate(updatedTask); // Mettre à jour l'état global ou notifier le parent
+      onTaskUpdate(updatedTask);
     } catch (error) {
       console.error('Erreur lors de la modification des notifications:', error);
-      // Revenir à l'état précédent si l'API échoue
       setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: !newNotificationState }));
       alert('Impossible de modifier les notifications. Veuillez réessayer.');
     }
@@ -38,13 +52,11 @@ const TaskComponent = ({ task, onTaskUpdate, onDelete }) => {
     setLocalTask(prevTask => ({ ...prevTask, completed: newCompletionState }));
     
     try {
-      const updatedTask = await toggleTaskCompletion(localTask._id);
-      // Si la mise à jour a réussi, on met à jour l'état local
+      const updatedTask: Task = await toggleTaskCompletion(localTask._id);
       setLocalTask(updatedTask);
-      onTaskUpdate(updatedTask); // Mettre à jour l'état global ou notifier le parent
+      onTaskUpdate(updatedTask);
     } catch (error) {
       console.error('Erreur lors de la modification du statut de complétion:', error);
-      // Revenir à l'état précédent si l'API échoue
       setLocalTask(prevTask => ({ ...prevTask, completed: !newCompletionState }));
       alert('Impossible de modifier le statut de la tâche. Veuillez réessayer.');
     }
@@ -62,8 +74,7 @@ const TaskComponent = ({ task, onTaskUpdate, onDelete }) => {
     }
   };
 
-  // Fonction pour formater la date
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString();
   };
 
