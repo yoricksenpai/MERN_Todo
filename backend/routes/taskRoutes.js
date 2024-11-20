@@ -242,7 +242,10 @@ router.patch('/task/:id/toggle-notifications', authMiddleware, async (req, res) 
         if (task.notificationsEnabled) {
             await notificationService.saveSubscription(info.userId, req.body.subscription);
         }
-
+        console.log('Request body subscription:', req.body.subscription);
+        console.log('Toggling notifications for task ID:', id);
+        console.log('Task notificationsEnabled:', task.notificationsEnabled);
+        
         res.json(updatedTask);
     } catch (error) {
         console.error('Error toggling task notifications:', error);

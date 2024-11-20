@@ -176,6 +176,12 @@ export const toggleTaskNotifications = async (taskId, subscription) => {
       body: JSON.stringify({ subscription }),
       credentials: 'include'
     });
+    if (!subscription || typeof subscription !== 'object') {
+      throw new Error('Invalid subscription data');
+  }
+  console.log('Sending subscription data:', subscription);
+  console.log('Task ID:', taskId);
+    
     return await handleResponse(response);
   } catch (error) {
     console.error('Erreur dans toggleTaskNotifications:', error);
