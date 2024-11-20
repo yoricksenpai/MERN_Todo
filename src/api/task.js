@@ -144,14 +144,19 @@ export const updateTask = async (taskId, taskData) => {
  * @throws {Error} Si la r ponse du serveur n' tait pas OK.
  */
 export const toggleTaskCompletion = async (taskId) => {
-  if (!taskId) {
-    throw new Error('Task ID is required');
+  try {
+    if (!taskId) {
+      throw new Error('Task ID is required');
+    }
+    const response = await fetch(`${API_URL}/tasks/task/${taskId}/toggle-completion`, {
+      method: 'PATCH',
+      credentials: 'include'
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Erreur dans toggleTaskCompletion:', error);
+    throw error;
   }
-  const response = await fetch(`${API_URL}/tasks/task/${taskId}/toggle-completion`, {
-    method: 'PATCH',
-    credentials: 'include'
-  });
-  return handleResponse(response);
 };
 /**
  * Active ou d active les notifications pour une t che.
@@ -164,13 +169,18 @@ export const toggleTaskCompletion = async (taskId) => {
  * @throws {Error} Si la r ponse du serveur n' tait pas OK.
  */
 export const toggleTaskNotifications = async (taskId, subscription) => {
-  const response = await fetch(  `${API_URL}/tasks/task/${taskId}/toggle-notifications`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ subscription }),
-    credentials: 'include'
-  });
-  return handleResponse(response);
+  try {
+    const response = await fetch(`${API_URL}/tasks/task/${taskId}/toggle-notifications`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription }),
+      credentials: 'include'
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Erreur dans toggleTaskNotifications:', error);
+    throw error;
+  }
 };
 
 /**
