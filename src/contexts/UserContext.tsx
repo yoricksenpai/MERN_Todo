@@ -36,7 +36,7 @@ export const UserContextProvider: React.FC<{children: React.ReactNode}> = ({ chi
 
   const checkAuth = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:3000/auth/profile', {
+      const response = await fetch('/api/auth/profile', {
         credentials: 'include'
       });
       if (response.ok) {
