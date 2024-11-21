@@ -14,11 +14,24 @@ async function checkAndNotifyTasks() {
   }
 }
 
+async function deleteOldNotifications() {
+  console.log('Suppression des anciennes notifications...');
+  try {
+    await notificationService.deleteOldNotifications();
+    console.log('Anciennes notifications supprimées avec succès.');
+  } catch (error) {
+    console.error('Erreur lors de la suppression des anciennes notifications:', error);
+  }
+}
+
+
 // Configurer les tâches planifiées
 function setupScheduledTasks() {
   // Vérifier les tâches toutes les heures
   cron.schedule('0 * * * *', checkAndNotifyTasks);
 
+    // Supprimer les notifications anciennes tous les jours à minuit
+    cron.schedule('0 0 * * *', deleteOldNotifications);
   // Vous pouvez ajouter d'autres tâches planifiées ici si nécessaire
 }
 

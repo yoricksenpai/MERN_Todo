@@ -68,21 +68,37 @@ export const notificationService = {
   async checkAndSendTaskNotifications() {
     const now = new Date();
     const twentyFourHoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
+  
     try {
       const tasksToNotify = await Task.find({
         deadline: { $gt: now, $lte: twentyFourHoursLater },
-        completed: false
+        completed: false,
+        notificationsEnabled: true  // Ajouter cette condition
       }).populate('author');
-
+  
       for (let task of tasksToNotify) {
         await this.sendTaskNotification(task._id);
       }
-
+  
       return { success: true, message: 'Task notifications checked and sent' };
     } catch (error) {
       console.error('Error checking and sending task notifications:', error);
       return { success: false, message: 'Failed to check and send task notifications' };
+    }
+  },
+
+  async sendRealTimeNotification(taskId, message) {
+    try {
+      const task = await Task.findById(taskId).populate('author');
+      if (!task) {
+        return { success: false, message: 'Task not found' };
+      }
+  
+      const title = 'Mise à jour de tâche';
+      return await this.sendNotificationToUser(task.author._id, title, message, 'task_update');
+    } catch (error) {
+      console.error('Error sending real-time notification:', error);
+      return { success: false, message: 'Failed to send real-time notification' };
     }
   },
 

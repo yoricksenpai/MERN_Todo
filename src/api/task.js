@@ -170,18 +170,20 @@ export const toggleTaskCompletion = async (taskId) => {
  */
 export const toggleTaskNotifications = async (taskId, subscription) => {
   try {
+    if (!taskId) {
+      throw new Error('Task ID is required');
+    }
+    if (!subscription || typeof subscription !== 'object') {
+      throw new Error('Invalid subscription data');
+    }
+    console.log('Sending subscription data:', subscription);
+    console.log('Task ID:', taskId);
     const response = await fetch(`${API_URL}/tasks/task/${taskId}/toggle-notifications`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subscription }),
       credentials: 'include'
     });
-    if (!subscription || typeof subscription !== 'object') {
-      throw new Error('Invalid subscription data');
-  }
-  console.log('Sending subscription data:', subscription);
-  console.log('Task ID:', taskId);
-    
     return await handleResponse(response);
   } catch (error) {
     console.error('Erreur dans toggleTaskNotifications:', error);

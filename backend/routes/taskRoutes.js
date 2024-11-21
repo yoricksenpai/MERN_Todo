@@ -208,6 +208,10 @@ router.patch('/task/:id/toggle-completion', authMiddleware, async (req, res) => 
 
         task.completed = !task.completed;
         const updatedTask = await task.save();
+        // Envoyer une notification en temps réel
+    await notificationService.sendRealTimeNotification(task._id, 'La tâche a été marquée comme complétée.');
+
+    res.json(updatedTask);
 
         res.json(updatedTask);
     } catch (error) {
@@ -217,42 +221,45 @@ router.patch('/task/:id/toggle-completion', authMiddleware, async (req, res) => 
 });
 
 // Route pour activer/désactiver les notifications pour une tâche spécifique
+// Route pour activer/désactiver les notifications pour une tâche spécifique
 router.patch('/task/:id/toggle-notifications', authMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-          const { token } = req.cookies;
-
-       const info = await new Promise((resolve, reject) => {
-      jwt.verify(token, env.JWT_SECRET, {}, (err, decoded) => {
-        if (err) reject(err);
-        else resolve(decoded);
+  try {
+      const { id } = req.params;
+      const { token } = req.cookies;
+      const info = await new Promise((resolve, reject) => {
+          jwt.verify(token, env.JWT_SECRET, {}, (err, decoded) => {
+              if (err) reject(err);
+              else resolve(decoded);
+          });
       });
-  });
-        const task = await Task.findOne({ _id: id, author: info.userId });
+      const task = await Task.findOne({ _id: id, author: info.userId });
 
-        if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
-        }
+      if (!task) {
+          return res.status(404).json({ message: 'Task not found' });
+      }
 
-        // Supposons que nous ajoutons un champ 'notificationsEnabled' à notre modèle de tâche
-        task.notificationsEnabled = !task.notificationsEnabled;
-        const updatedTask = await task.save();
+      task.notificationsEnabled = !task.notificationsEnabled;
+      const updatedTask = await task.save();
 
-        // Si les notifications sont activées, nous pourrions vouloir enregistrer l'abonnement
-        if (task.notificationsEnabled) {
-            await notificationService.saveSubscription(info.userId, req.body.subscription);
-        }
-        console.log('Request body subscription:', req.body.subscription);
-        console.log('Toggling notifications for task ID:', id);
-        console.log('Task notificationsEnabled:', task.notificationsEnabled);
-        
-        res.json(updatedTask);
-    } catch (error) {
-        console.error('Error toggling task notifications:', error);
-        res.status(500).json({ message: 'Error updating task notification settings' });
-    }
+      // Si les notifications sont activées, nous pourrions vouloir envoyer une notification
+      if (task.notificationsEnabled) {
+          const notification = new Notification({
+              userId: info.userId,
+              message: `Les notifications pour la tâche "${task.title}" ont été activées.`,
+              type: 'task_reminder'
+          });
+          await notification.save();
+
+          // Ici, vous pouvez utiliser votre service de notification pour envoyer une notification en temps réel
+          await notificationService.sendNotification(info.userId, notification);
+      }
+
+      res.json(updatedTask);
+  } catch (error) {
+      console.error('Error toggling task notifications:', error);
+      res.status(500).json({ message: 'Error updating task notification settings' });
+  }
 });
-
 
 
 
