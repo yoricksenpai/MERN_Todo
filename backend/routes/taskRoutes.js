@@ -4,7 +4,7 @@ import { env } from 'node:process';
 const router = express.Router();
 import Task, {TaskList} from '../models/taskModel.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
-import notificationService from '../utils/notificationService.js';
+import {notificationService} from '../utils/notificationService.js';
 import Category from '../models/categoryModel.js';
 import User from '../models/userModel.js';
 import mongoose from 'mongoose';

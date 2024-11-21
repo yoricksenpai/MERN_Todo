@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 import { env } from 'node:process';
-import notificationService from '../utils/notificationService.js';
+import {notificationService} from '../utils/notificationService.js';
 import authMiddleware from '../middlewares/authMiddleware.js'; 
 
 const router = express.Router();
