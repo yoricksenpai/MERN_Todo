@@ -209,10 +209,6 @@ router.patch('/task/:id/toggle-completion', authMiddleware, async (req, res) => 
         task.completed = !task.completed;
         const updatedTask = await task.save();
         // Envoyer une notification en temps réel
-    await notificationService.sendRealTimeNotification(task._id, 'La tâche a été marquée comme complétée.');
-
-    res.json(updatedTask);
-
         res.json(updatedTask);
     } catch (error) {
         console.error('Error toggling task completion:', error);
