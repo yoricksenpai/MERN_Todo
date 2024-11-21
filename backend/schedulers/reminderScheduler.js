@@ -1,7 +1,7 @@
 // scheduledTasks.js
 
 import cron from 'node-cron';
-import notificationService from '../utils/notificationService.js';
+import {notificationService} from '../utils/notificationService.js';
 
 // Fonction pour vérifier et envoyer les notifications des tâches
 async function checkAndNotifyTasks() {
