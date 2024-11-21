@@ -15,14 +15,14 @@ const API_URL ='/api'
 
 
 
+// Assurez-vous que handleResponse est défini pour renvoyer une promesse rejetée si la réponse n'est pas OK
 const handleResponse = async (response) => {
   const data = await response.json();
   if (!response.ok) {
-    throw data.error || response.statusText;
+    throw data.error || response.statusText; // Jetez une erreur si la réponse n'est pas OK
   }
-  return data;
+  return data; // Renvoie les données si la réponse est OK
 };
-
 /**
  * Cr e une nouvelle t che sur le serveur.
  *
@@ -155,9 +155,11 @@ export const toggleTaskCompletion = async (taskId) => {
     return await handleResponse(response);
   } catch (error) {
     console.error('Erreur dans toggleTaskCompletion:', error);
-    throw error;
+    throw error; // Assurez-vous de bien jeter l'erreur pour que le try/catch dans le composant puisse la capturer
   }
 };
+
+
 /**
  * Active ou d active les notifications pour une t che.
  *

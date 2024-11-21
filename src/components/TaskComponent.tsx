@@ -66,7 +66,10 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
     try {
       const updatedTask: Task = await toggleTaskCompletion(localTask._id);
       setLocalTask(updatedTask);
-      onTaskUpdate(updatedTask);
+      // Vérifiez que onTaskUpdate est une fonction avant de l'appeler
+      if (typeof onTaskUpdate === 'function') {
+        onTaskUpdate(updatedTask);
+      }
     } catch (error) {
       console.error('Erreur lors de la modification du statut de complétion:', error);
       setLocalTask(prevTask => ({ ...prevTask, completed: !newCompletionState }));
