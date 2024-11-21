@@ -22,6 +22,7 @@ interface TaskComponentProps {
 const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDelete }) => {
   const navigate = useNavigate();
   const [localTask, setLocalTask] = useState<Task>(task);
+  const [loading, setLoading] = useState(false); // État pour gérer le chargement des notifications
 
   // Mise à jour de la tâche locale lorsque la tâche passée en prop change
   useEffect(() => {
@@ -41,17 +42,34 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
       console.error('Task ID is undefined');
       return;
     }
+
+    // Désactiver l'interface en attendant la réponse
+    setLoading(true);
+
     const newNotificationState = !localTask.notificationsEnabled;
     setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: newNotificationState }));
-    
+
     try {
-      const updatedTask: Task = await toggleTaskNotifications(localTask._id, {});
+      // Récupération de la subscription du service worker
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
+      if (!subscription) {
+        console.error('No subscription found.');
+        setLoading(false);
+        return;
+      }
+
+      // Appeler la fonction pour activer/désactiver les notifications
+      const updatedTask: Task = await toggleTaskNotifications(localTask._id, subscription);
       setLocalTask(updatedTask);
       onTaskUpdate(updatedTask);
     } catch (error) {
       console.error('Erreur lors de la modification des notifications:', error);
       setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: !newNotificationState }));
       alert('Impossible de modifier les notifications. Veuillez réessayer.');
+    } finally {
+      setLoading(false); // Réactiver l'interface après la réponse
     }
   };
 
@@ -60,9 +78,12 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
       console.error('Task ID is undefined');
       return;
     }
+
+    setLoading(true); // Activer le chargement pour la modification
+
     const newCompletionState = !localTask.completed;
     setLocalTask(prevTask => ({ ...prevTask, completed: newCompletionState }));
-    
+
     try {
       const updatedTask: Task = await toggleTaskCompletion(localTask._id);
       setLocalTask(updatedTask);
@@ -74,6 +95,8 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
       console.error('Erreur lors de la modification du statut de complétion:', error);
       setLocalTask(prevTask => ({ ...prevTask, completed: !newCompletionState }));
       alert('Impossible de modifier le statut de la tâche. Veuillez réessayer.');
+    } finally {
+      setLoading(false); // Réactiver l'interface après la réponse
     }
   };
 
@@ -82,6 +105,7 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
       console.error('Task ID is undefined');
       return;
     }
+
     try {
       await onDelete(localTask._id);
     } catch (error) {
@@ -89,7 +113,6 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
       alert('Impossible de supprimer la tâche. Veuillez réessayer.');
     }
   };
-
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString();
@@ -118,8 +141,13 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
           onClick={handleToggleNotification}
           className={`mr-2 ${localTask.notificationsEnabled ? 'text-yellow-500 hover:text-yellow-600' : 'text-gray-400 hover:text-gray-500'}`}
           aria-label={localTask.notificationsEnabled ? "Désactiver les notifications" : "Activer les notifications"}
+          disabled={loading} // Désactiver pendant le chargement
         >
-          <Bell className="h-5 w-5" />
+          {loading ? (
+            <span className="animate-spin">⟳</span> // Affiche un spinner pendant le chargement
+          ) : (
+            <Bell className="h-5 w-5" />
+          )}
         </button>
         <button
           onClick={handleEdit}

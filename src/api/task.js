@@ -172,26 +172,37 @@ export const toggleTaskCompletion = async (taskId) => {
  */
 export const toggleTaskNotifications = async (taskId, subscription) => {
   try {
-    if (!taskId) {
-      throw new Error('Task ID is required');
-    }
+    if (!taskId) throw new Error('Task ID is required');
     if (!subscription || typeof subscription !== 'object') {
       throw new Error('Invalid subscription data');
     }
-    console.log('Sending subscription data:', subscription);
-    console.log('Task ID:', taskId);
+    if (!subscription.endpoint || !subscription.keys) {
+      throw new Error('Invalid subscription object: missing endpoint or keys');
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // Timeout de 10 secondes
+
     const response = await fetch(`${API_URL}/tasks/task/${taskId}/toggle-notifications`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subscription }),
-      credentials: 'include'
+      credentials: 'include',
+      signal: controller.signal
     });
+
+    clearTimeout(timeout); // Annuler le timeout si la requête réussit
     return await handleResponse(response);
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.error('Requête annulée en raison d\'un timeout.');
+    }
     console.error('Erreur dans toggleTaskNotifications:', error);
     throw error;
   }
 };
+
+
 
 /**
  * R cup re toutes les t ches appartenant   une cat gorie.

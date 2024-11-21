@@ -6,6 +6,7 @@ import Task, {TaskList} from '../models/taskModel.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 import notificationService from '../utils/notificationService.js';
 import Category from '../models/categoryModel.js';
+import User from '../models/userModel.js';
 import mongoose from 'mongoose';
 //ROUTES CRUD Tâches ainsi que Routes recupérations
 // Definir une route pour la creation d'une tâche
@@ -217,45 +218,66 @@ router.patch('/task/:id/toggle-completion', authMiddleware, async (req, res) => 
 });
 
 // Route pour activer/désactiver les notifications pour une tâche spécifique
-// Route pour activer/désactiver les notifications pour une tâche spécifique
 router.patch('/task/:id/toggle-notifications', authMiddleware, async (req, res) => {
   try {
-      const { id } = req.params;
-      const { token } = req.cookies;
-      const info = await new Promise((resolve, reject) => {
-          jwt.verify(token, env.JWT_SECRET, {}, (err, decoded) => {
-              if (err) reject(err);
-              else resolve(decoded);
-          });
+    const { id } = req.params;
+    const { subscription } = req.body;  // La subscription envoyée par le frontend
+    
+    if (!subscription || typeof subscription !== 'object') {
+      return res.status(400).json({ message: 'Invalid subscription data' });
+    }
+
+    const { token } = req.cookies;  // Récupérer le token de l'utilisateur
+    const info = await new Promise((resolve, reject) => {
+      jwt.verify(token, env.JWT_SECRET, {}, (err, decoded) => {
+        if (err) reject(err);
+        else resolve(decoded);
       });
-      const task = await Task.findOne({ _id: id, author: info.userId });
+    });
 
-      if (!task) {
-          return res.status(404).json({ message: 'Task not found' });
+    const task = await Task.findOne({ _id: id, author: info.userId });
+
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Bascule de l'état des notifications
+    task.notificationsEnabled = !task.notificationsEnabled;
+    await task.save();
+
+    // Enregistrer la subscription si les notifications sont activées
+    if (task.notificationsEnabled) {
+      const user = await User.findById(info.userId);
+
+      // Vérifier si l'utilisateur existe et si la subscription est valide
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
       }
 
-      task.notificationsEnabled = !task.notificationsEnabled;
-      const updatedTask = await task.save();
+      // Enregistrer la subscription dans le modèle utilisateur
+      user.pushSubscription = subscription;
+      await user.save();
 
-      // Si les notifications sont activées, nous pourrions vouloir envoyer une notification
-      if (task.notificationsEnabled) {
-          const notification = new Notification({
-              userId: info.userId,
-              message: `Les notifications pour la tâche "${task.title}" ont été activées.`,
-              type: 'task_reminder'
-          });
-          await notification.save();
+      // Si les notifications sont activées, envoyer une notification
+      const notification = new Notification({
+        userId: info.userId,
+        message: `Les notifications pour la tâche "${task.title}" ont été activées.`,
+        type: 'task_reminder'
+      });
 
-          // Ici, vous pouvez utiliser votre service de notification pour envoyer une notification en temps réel
-          await notificationService.sendNotification(info.userId, notification);
-      }
+      await notification.save();
 
-      res.json(updatedTask);
+      // Utilisation de votre service de notification pour envoyer une notification en temps réel
+      await notificationService.sendNotification(info.userId, notification);
+    }
+
+    res.json(task);
   } catch (error) {
-      console.error('Error toggling task notifications:', error);
-      res.status(500).json({ message: 'Error updating task notification settings' });
+    console.error('Error toggling task notifications:', error);
+    res.status(500).json({ message: 'Error updating task notification settings' });
   }
 });
+
 
 
 

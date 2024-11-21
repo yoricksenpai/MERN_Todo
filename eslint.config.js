@@ -7,6 +7,12 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 export default [
   { ignores: ['dist'] },
   {
+    files: ['**/service-worker.js'], // Ciblez uniquement votre fichier de service worker
+    env: {
+        serviceworker: true, // Ajoute les globales spécifiques aux service workers
+    },
+},
+  {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 2020,

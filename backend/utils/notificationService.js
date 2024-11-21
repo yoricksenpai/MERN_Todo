@@ -5,149 +5,98 @@ import User from '../models/userModel.js';
 import Task from '../models/taskModel.js';
 import Notification from '../models/notificationsModel.js';
 import dotenv from 'dotenv';
-
+import env from 'node:process';
 dotenv.config();
 
 webpush.setVapidDetails(
   'mailto:johanpriso10@gmail.com',
-  process.env.PUBLIC_VAPID_KEY,
-  process.env.PRIVATE_VAPID_KEY
+  env.PUBLIC_VAPID_KEY,
+  env.PRIVATE_VAPID_KEY
 );
 
 export const notificationService = {
+  /**
+   * Enregistrer une subscription Web Push pour un utilisateur
+   */
   async saveSubscription(userId, subscription) {
     try {
-      await User.findByIdAndUpdate(userId, { pushSubscription: subscription });
+      if (!subscription || !subscription.endpoint || !subscription.keys) {
+        throw new Error('Invalid subscription object');
+      }
+
+      const user = await User.findByIdAndUpdate(userId, { pushSubscription: subscription });
+      if (!user) {
+        return { success: false, message: 'User not found' };
+      }
+
       return { success: true, message: 'Subscription saved successfully' };
     } catch (error) {
-      console.error('Error saving subscription:', error);
+      console.error('Erreur lors de l\'enregistrement de la subscription:', error);
       return { success: false, message: 'Failed to save subscription' };
     }
   },
 
-  async sendNotificationToUser(userId, title, body, type = 'other') {
+  /**
+   * Envoyer une notification push à un utilisateur spécifique
+   */
+  async sendNotificationToUser(userId, title, body, url = '/') {
     try {
       const user = await User.findById(userId);
       if (!user || !user.pushSubscription) {
         return { success: false, message: 'User not found or not subscribed' };
       }
 
-      const payload = JSON.stringify({ title, body });
+      const payload = JSON.stringify({ title, body, url });
       await webpush.sendNotification(user.pushSubscription, payload);
 
-      // Créer une nouvelle notification dans la base de données
-      await Notification.create({
-        userId,
-        message: body,
-        type
-      });
-
+      console.log('Notification envoyée avec succès à l\'utilisateur:', userId);
       return { success: true, message: 'Notification sent successfully' };
     } catch (error) {
-      console.error('Error sending notification:', error);
+      console.error('Erreur lors de l\'envoi de la notification:', error);
       return { success: false, message: 'Failed to send notification' };
     }
   },
 
-  async sendTaskNotification(taskId) {
-    try {
-      const task = await Task.findById(taskId).populate('author');
-      if (!task) {
-        return { success: false, message: 'Task not found' };
-      }
-
-      const title = 'Rappel de tâche';
-      const body = `La tâche "${task.title}" arrive à échéance bientôt.`;
-      return await this.sendNotificationToUser(task.author._id, title, body, 'task_reminder');
-    } catch (error) {
-      console.error('Error sending task notification:', error);
-      return { success: false, message: 'Failed to send task notification' };
-    }
-  },
-
+  /**
+   * Vérifier les tâches et envoyer des notifications pour celles proches de l'expiration
+   */
   async checkAndSendTaskNotifications() {
     const now = new Date();
     const twentyFourHoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  
+
     try {
       const tasksToNotify = await Task.find({
         deadline: { $gt: now, $lte: twentyFourHoursLater },
         completed: false,
-        notificationsEnabled: true  // Ajouter cette condition
+        notificationsEnabled: true,
       }).populate('author');
-  
-      for (let task of tasksToNotify) {
-        await this.sendTaskNotification(task._id);
+
+      for (const task of tasksToNotify) {
+        await this.sendNotificationToUser(
+          task.author._id,
+          'Rappel de tâche',
+          `Votre tâche "${task.title}" arrive à échéance.`,
+          `/tasks/${task._id}`
+        );
       }
-  
+
       return { success: true, message: 'Task notifications checked and sent' };
     } catch (error) {
-      console.error('Error checking and sending task notifications:', error);
-      return { success: false, message: 'Failed to check and send task notifications' };
+      console.error('Erreur lors de la vérification et de l\'envoi des notifications:', error);
+      return { success: false, message: 'Failed to check and send notifications' };
     }
   },
 
-  async sendRealTimeNotification(taskId, message) {
-    try {
-      const task = await Task.findById(taskId).populate('author');
-      if (!task) {
-        return { success: false, message: 'Task not found' };
-      }
-  
-      const title = 'Mise à jour de tâche';
-      return await this.sendNotificationToUser(task.author._id, title, message, 'task_update');
-    } catch (error) {
-      console.error('Error sending real-time notification:', error);
-      return { success: false, message: 'Failed to send real-time notification' };
-    }
-  },
-
-  async getUserNotifications(userId) {
-    try {
-      const notifications = await Notification.find({ userId, isRead: false })
-        .sort({ createdAt: -1 })
-        .limit(10);  // Limite à 10 notifications non lues les plus récentes
-
-      return notifications.map(notification => ({
-        id: notification._id,
-        message: notification.message,
-        type: notification.type,
-        createdAt: notification.createdAt
-      }));
-    } catch (error) {
-      console.error('Error getting user notifications:', error);
-      throw error;
-    }
-  },
-
-  async markNotificationAsRead(userId, notificationId) {
-    try {
-      const notification = await Notification.findOneAndUpdate(
-        { _id: notificationId, userId: userId },
-        { isRead: true },
-        { new: true }
-      );
-
-      if (!notification) {
-        throw new Error('Notification not found or does not belong to the user');
-      }
-
-      return { success: true, message: 'Notification marked as read' };
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      throw error;
-    }
-  },
-
+  /**
+   * Supprimer les anciennes notifications de la base de données
+   */
   async deleteOldNotifications() {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     try {
       await Notification.deleteMany({ createdAt: { $lt: thirtyDaysAgo } });
-      console.log('Old notifications deleted successfully');
+      console.log('Anciennes notifications supprimées avec succès.');
     } catch (error) {
-      console.error('Error deleting old notifications:', error);
+      console.error('Erreur lors de la suppression des anciennes notifications:', error);
     }
-  }
+  },
 };
-
-export default notificationService;
