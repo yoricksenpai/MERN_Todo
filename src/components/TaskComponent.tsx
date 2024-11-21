@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trash2, Edit2, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toggleTaskNotifications, toggleTaskCompletion } from '../api/task';
@@ -29,10 +29,18 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
   }, [task]);
 
   const handleEdit = () => {
+    if (!localTask._id) {
+      console.error('Task ID is undefined');
+      return;
+    }
     navigate(`/edit_task/${localTask._id}`);
   };
 
   const handleToggleNotification = async () => {
+    if (!localTask._id) {
+      console.error('Task ID is undefined');
+      return;
+    }
     const newNotificationState = !localTask.notificationsEnabled;
     setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: newNotificationState }));
     
@@ -48,6 +56,10 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
   };
 
   const handleToggleCompletion = async () => {
+    if (!localTask._id) {
+      console.error('Task ID is undefined');
+      return;
+    }
     const newCompletionState = !localTask.completed;
     setLocalTask(prevTask => ({ ...prevTask, completed: newCompletionState }));
     
@@ -63,16 +75,18 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
   };
 
   const handleDelete = async () => {
+    if (!localTask._id) {
+      console.error('Task ID is undefined');
+      return;
+    }
     try {
-      if (!localTask._id) {
-        throw new Error('Task _id is undefined');
-      }
       await onDelete(localTask._id);
     } catch (error) {
       console.error('Erreur lors de la suppression de la tâche:', error);
       alert('Impossible de supprimer la tâche. Veuillez réessayer.');
     }
   };
+
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString();
