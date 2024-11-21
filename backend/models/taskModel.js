@@ -24,7 +24,7 @@ const taskSchema = new mongoose.Schema({
     category: { type: mongoose.Schema.Types.ObjectId, ref:'Category', required: true },
     author: { type: mongoose.Schema.Types.ObjectId, ref:'User', required: true },
     completed: { type: Boolean, default: false },
-    notificationsEnabled: { type: Boolean, default: true },
+    notificationsEnabled: { type: Boolean, default: false },
 }, {
     timestamps: true
 });
