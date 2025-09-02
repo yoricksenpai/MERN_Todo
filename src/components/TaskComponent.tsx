@@ -1,25 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Edit2, Bell } from 'lucide-react';
+import { Trash2, Edit2, Bell, Calendar, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toggleTaskNotifications, toggleTaskCompletion } from '../api/task';
+import { showError } from '../utils/toast';
+import { Task } from '../types';
+import Card from './ui/Card';
+import Button from './ui/Button';
 
-// Définir l'interface pour une tâche
-interface Task {
-  _id: string;
-  title: string;
-  deadline: string;
-  completed: boolean;
-  notificationsEnabled: boolean;
-  // Ajoutez d'autres propriétés si nécessaire
-}
+// Helper to convert VAPID public key (base64) to Uint8Array required by PushManager
+const urlBase64ToUint8Array = (base64String: string) => {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+};
 
 interface TaskComponentProps {
   task: Task;
-  onTaskUpdate: (task: Task) => void;
+  onUpdate: (task: Task) => void;
   onDelete: (id: string) => Promise<void>;
 }
 
-const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDelete }) => {
+const TaskComponent: React.FC<TaskComponentProps> = ({ task, onUpdate, onDelete }) => {
   const navigate = useNavigate();
   const [localTask, setLocalTask] = useState<Task>(task);
   const [loading, setLoading] = useState(false); // État pour gérer le chargement des notifications
@@ -52,22 +58,42 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
     try {
       // Récupération de la subscription du service worker
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
+      let subscription = await registration.pushManager.getSubscription();
 
+      // Si aucune subscription, demander la permission et s'abonner automatiquement
       if (!subscription) {
-        console.error('No subscription found.');
-        setLoading(false);
-        return;
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: !newNotificationState }));
+          showError('Permission de notifications refusée');
+          setLoading(false);
+          return;
+        }
+
+        const vapidPublicKey = (import.meta as any).env?.VITE_PUBLIC_VAPID_KEY as string | undefined;
+        if (!vapidPublicKey) {
+          console.error('Missing VAPID public key (VITE_PUBLIC_VAPID_KEY)');
+          setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: !newNotificationState }));
+          showError('Configuration des notifications manquante');
+          setLoading(false);
+          return;
+        }
+
+        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey
+        });
       }
 
       // Appeler la fonction pour activer/désactiver les notifications
       const updatedTask: Task = await toggleTaskNotifications(localTask._id, subscription);
       setLocalTask(updatedTask);
-      onTaskUpdate(updatedTask);
+      onUpdate(updatedTask);
     } catch (error) {
       console.error('Erreur lors de la modification des notifications:', error);
       setLocalTask(prevTask => ({ ...prevTask, notificationsEnabled: !newNotificationState }));
-      alert('Impossible de modifier les notifications. Veuillez réessayer.');
+      showError('Impossible de modifier les notifications');
     } finally {
       setLoading(false); // Réactiver l'interface après la réponse
     }
@@ -87,14 +113,13 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
     try {
       const updatedTask: Task = await toggleTaskCompletion(localTask._id);
       setLocalTask(updatedTask);
-      // Vérifiez que onTaskUpdate est une fonction avant de l'appeler
-      if (typeof onTaskUpdate === 'function') {
-        onTaskUpdate(updatedTask);
+      if (typeof onUpdate === 'function') {
+        onUpdate(updatedTask);
       }
     } catch (error) {
       console.error('Erreur lors de la modification du statut de complétion:', error);
       setLocalTask(prevTask => ({ ...prevTask, completed: !newCompletionState }));
-      alert('Impossible de modifier le statut de la tâche. Veuillez réessayer.');
+      showError('Impossible de modifier le statut de la tâche');
     } finally {
       setLoading(false); // Réactiver l'interface après la réponse
     }
@@ -110,7 +135,7 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
       await onDelete(localTask._id);
     } catch (error) {
       console.error('Erreur lors de la suppression de la tâche:', error);
-      alert('Impossible de supprimer la tâche. Veuillez réessayer.');
+      showError('Impossible de supprimer la tâche');
     }
   };
 
@@ -119,52 +144,77 @@ const TaskComponent: React.FC<TaskComponentProps> = ({ task, onTaskUpdate, onDel
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-      <div className="flex items-center mb-2 sm:mb-0">
-        <input
-          type="checkbox"
-          checked={localTask.completed}
-          onChange={handleToggleCompletion}
-          className="mr-3 rounded border-gray-300 dark:border-gray-600"
-        />
-        <div>
-          <h3 className={`font-medium ${localTask.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'dark:text-white'}`}>
-            {localTask.title}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Échéance : {formatDate(localTask.deadline)}
-          </p>
+    <Card hover className="p-3 sm:p-4 lg:p-6 animate-fadeIn h-full flex flex-col">
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
+        <button
+          onClick={handleToggleCompletion}
+          className={`transition-colors ${
+            localTask.completed 
+              ? 'text-emerald-600' 
+              : 'text-slate-400 hover:text-emerald-600'
+          }`}
+          disabled={loading}
+        >
+          <CheckCircle2 className={`h-5 w-5 lg:h-6 lg:w-6 ${
+            localTask.completed ? 'fill-current' : ''
+          }`} />
+        </button>
+        
+        <div className="flex items-center space-x-1 lg:space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleNotification}
+            loading={loading}
+            className={localTask.notificationsEnabled ? 'text-amber-600' : 'text-slate-400'}
+          >
+            <Bell className="h-3 w-3 lg:h-4 lg:w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleEdit}
+            className="text-blue-600"
+          >
+            <Edit2 className="h-3 w-3 lg:h-4 lg:w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDelete}
+            className="text-red-600"
+          >
+            <Trash2 className="h-3 w-3 lg:h-4 lg:w-4" />
+          </Button>
         </div>
       </div>
-      <div className="flex items-center mt-2 sm:mt-0">
-        <button
-          onClick={handleToggleNotification}
-          className={`mr-2 ${localTask.notificationsEnabled ? 'text-yellow-500 hover:text-yellow-600' : 'text-gray-400 hover:text-gray-500'}`}
-          aria-label={localTask.notificationsEnabled ? "Désactiver les notifications" : "Activer les notifications"}
-          disabled={loading} // Désactiver pendant le chargement
-        >
-          {loading ? (
-            <span className="animate-spin">⟳</span> // Affiche un spinner pendant le chargement
-          ) : (
-            <Bell className="h-5 w-5" />
+      
+      <div className="flex-1">
+        <h3 className={`font-semibold text-base lg:text-lg mb-3 transition-all line-clamp-2 ${
+          localTask.completed 
+            ? 'line-through text-slate-500 dark:text-slate-400' 
+            : 'text-slate-900 dark:text-white'
+        }`}>
+          {localTask.title}
+        </h3>
+        
+        <div className="space-y-2">
+          <div className="flex items-center text-xs lg:text-sm text-slate-600 dark:text-slate-400">
+            <Calendar className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
+            <span>{formatDate(localTask.deadline)}</span>
+          </div>
+          
+          {localTask.notificationsEnabled && (
+            <div className="flex items-center text-xs lg:text-sm text-amber-600">
+              <Bell className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
+              <span>Notifications</span>
+            </div>
           )}
-        </button>
-        <button
-          onClick={handleEdit}
-          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mr-2"
-          aria-label="Modifier la tâche"
-        >
-          <Edit2 className="h-5 w-5" />
-        </button>
-        <button
-          onClick={handleDelete}
-          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-          aria-label="Supprimer la tâche"
-        >
-          <Trash2 className="h-5 w-5" />
-        </button>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

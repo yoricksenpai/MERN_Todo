@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getProfile, logout as apiLogout } from '../api/auth';
 
 interface User {
   id: string;
@@ -25,44 +26,31 @@ export const UserContext = createContext<UserContextType>({
 });
 
 export const UserContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [userInfo, setUserInfo] = useState<User | null>(() => {
-    // Initialise l'état avec la valeur stockée dans localStorage, si elle existe
-    const storedUser = localStorage.getItem('userInfo');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [userInfo, setUserInfo] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const checkAuth = useCallback(async () => {
     try {
-      const response = await fetch('/api/auth/profile', {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const user = await response.json();
-        setUserInfo(user);
-        setIsAuthenticated(true);
-        localStorage.setItem('userInfo', JSON.stringify(user)); // Persiste l'utilisateur
-      } else {
-        setUserInfo(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('userInfo'); // Efface les données utilisateur
-      }
+      const user = await getProfile();
+      setUserInfo(user);
+      setIsAuthenticated(true);
     } catch (error) {
-      console.error("Erreur lors de la vérification de l'authentification:", error);
       setUserInfo(null);
       setIsAuthenticated(false);
-      localStorage.removeItem('userInfo'); // Efface les données utilisateur
     }
   }, []);
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await apiLogout();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
     setUserInfo(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('userInfo');
-    // Ici, vous pourriez aussi appeler une API pour déconnecter l'utilisateur côté serveur
-    navigate('/login_register'); // Redirection après déconnexion
+    navigate('/login_register');
   };
 
   useEffect(() => {
