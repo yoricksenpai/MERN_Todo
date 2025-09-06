@@ -1,9 +1,9 @@
 import express, { Request, Response } from 'express';
-import Category from '../models/categoryModel.js';
-import authMiddleware from '../middlewares/authMiddleware.js';
+import Category from '../models/categoryModel.ts';
+import authMiddleware from '../middlewares/authMiddleware.ts';
 import jwt from 'jsonwebtoken';
 import { env } from 'node:process';
-import { AuthRequest } from '../types/index.js';
+import { AuthRequest } from '../types/index.ts';
 
 const router = express.Router();
 

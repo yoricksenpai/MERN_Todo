@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { ICategory } from '../types/index.js';
+import { ICategory } from '../types/index.ts';
 
 const categorySchema = new Schema<ICategory>({
     name: { type: String, required: true },

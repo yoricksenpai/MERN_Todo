@@ -2,14 +2,14 @@ import express, { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from 'node:process';
 const router = express.Router();
-import Task, { TaskList } from '../models/taskModel.js';
-import authMiddleware from '../middlewares/authMiddleware.js';
-import Category from '../models/categoryModel.js';
-import User from '../models/userModel.js';
+import Task, { TaskList } from '../models/taskModel.ts';
+import authMiddleware from '../middlewares/authMiddleware.ts';
+import Category from '../models/categoryModel.ts';
+import User from '../models/userModel.ts';
 import mongoose from 'mongoose';
-import { validateObjectId, validateTaskData } from '../middlewares/validation.js';
-import { AuthRequest } from '../types/index.js';
-import { notificationService } from '../utils/notificationService.js';
+import { validateObjectId, validateTaskData } from '../middlewares/validation.ts';
+import { AuthRequest } from '../types/index.ts';
+import { notificationService } from '../utils/notificationService.ts';
 
 // ROUTES CRUD Tâches
 // Route pour la création d'une tâche

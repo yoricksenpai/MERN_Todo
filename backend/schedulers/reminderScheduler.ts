@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { notificationService } from '../utils/notificationService.js';
+import { notificationService } from '../utils/notificationService.ts';
 
 async function checkAndNotifyTasks(): Promise<void> {
   console.log('Vérification des tâches à notifier...');

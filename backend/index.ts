@@ -1,14 +1,14 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response } from 'express';
 import { env } from 'node:process';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import authRoutes from './routes/authRoutes.js';
-import taskRoutes from './routes/taskRoutes.js';
-import taskListRoutes from './routes/taskListRoutes.js';
-import categoryRoutes from './routes/categoryRoutes.js';
-import initScheduledTasks from './schedulers/reminderScheduler.js';
-import connectDB from './config/dbConfig.js';
-import { errorHandler } from './middlewares/errorHandler.js';
+import authRoutes from './routes/authRoutes.ts';
+import taskRoutes from './routes/taskRoutes.ts';
+import taskListRoutes from './routes/taskListRoutes.ts';
+import categoryRoutes from './routes/categoryRoutes.ts';
+import initScheduledTasks from './schedulers/reminderScheduler.ts';
+import connectDB from './config/dbConfig.ts';
+import { errorHandler } from './middlewares/errorHandler.ts';
 
 connectDB();
 
@@ -24,7 +24,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -40,6 +40,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Routes
+app.get('/', (req: Request, res: Response) => {
+  res.json({ message: 'MERN Todo Backend API is running!', status: 'healthy' });
+});
+
 app.use('/auth', authRoutes);
 app.use('/tasks', taskRoutes);
 app.use('/cat', categoryRoutes);

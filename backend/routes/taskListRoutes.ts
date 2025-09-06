@@ -2,10 +2,10 @@ import express, { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from 'node:process';
 const router = express.Router();
-import Task, { TaskList } from '../models/taskModel.js';
-import authMiddleware from '../middlewares/authMiddleware.js';
-import User from '../models/userModel.js';
-import { AuthRequest } from '../types/index.js';
+import Task, { TaskList } from '../models/taskModel.ts';
+import authMiddleware from '../middlewares/authMiddleware.ts';
+import User from '../models/userModel.ts';
+import { AuthRequest } from '../types/index.ts';
 
 // ROUTES CRUD ET AUTRES POUR LES LISTES DE TACHES
 // Partager une liste de tâches

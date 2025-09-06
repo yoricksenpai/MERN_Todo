@@ -2,16 +2,21 @@
     "version": 2,
     "builds": [
         {
-            "src": "index.js",
-            "use": "@vercel/node"
+            "src": "index.ts",
+            "use": "@vercel/node@2"
         }
     ],
-    "rewrites": [
+    "routes": [
         {
-            "source": "/(.*)",
-            "destination": "/index.js"
+            "src": "/(.*)",
+            "dest": "/index.ts"
         }
     ],
+    "functions": {
+        "index.ts": {
+            "maxDuration": 30
+        }
+    },
     "env": {
         "NODE_ENV": "production"
     }

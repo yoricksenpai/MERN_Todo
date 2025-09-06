@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { ITask, ITaskList } from '../types/index.js';
+import { ITask, ITaskList } from '../types/index.ts';
 
 const taskListSchema = new Schema<ITaskList>({
     name: { type: String, required: true },
