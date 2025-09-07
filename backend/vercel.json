@@ -1,22 +1,16 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "index.ts",
-            "use": "@vercel/node@2"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "/index.ts"
-        }
-    ],
     "functions": {
         "index.ts": {
+            "runtime": "nodejs18.x",
             "maxDuration": 30
         }
     },
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.ts"
+        }
+    ],
     "env": {
         "NODE_ENV": "production"
     }
