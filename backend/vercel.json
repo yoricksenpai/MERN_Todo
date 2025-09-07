@@ -1,16 +1,14 @@
 {
-    "functions": {
-        "index.ts": {
-            "runtime": "nodejs18.x"
-        }
-    },
-    "rewrites": [
+    "builds": [
         {
-            "source": "/(.*)",
-            "destination": "/index.ts"
+            "src": "index.ts",
+            "use": "@vercel/node"
         }
     ],
-    "env": {
-        "NODE_ENV": "production"
-    }
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/index.ts"
+        }
+    ]
 }
