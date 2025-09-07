@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { Response, NextFunction } from 'express';
-import User from '../models/userModel.ts';
+import User from '../models/userModel.js';
 import { env } from 'node:process';
-import { AuthRequest } from '../types/index.ts';
+import { AuthRequest } from '../types/index.js';
 import dotenv from 'dotenv';
 dotenv.config();
 

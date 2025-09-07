@@ -2,13 +2,13 @@ import express, { Application, Request, Response } from 'express';
 import { env } from 'node:process';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import authRoutes from './routes/authRoutes.ts';
-import taskRoutes from './routes/taskRoutes.ts';
-import taskListRoutes from './routes/taskListRoutes.ts';
-import categoryRoutes from './routes/categoryRoutes.ts';
-import initScheduledTasks from './schedulers/reminderScheduler.ts';
-import connectDB from './config/dbConfig.ts';
-import { errorHandler } from './middlewares/errorHandler.ts';
+import authRoutes from './routes/authRoutes.js';
+import taskRoutes from './routes/taskRoutes.js';
+import taskListRoutes from './routes/taskListRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import initScheduledTasks from './schedulers/reminderScheduler.js';
+import connectDB from './config/dbConfig.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 connectDB();
 

@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/userModel.ts';
+import User from '../models/userModel.js';
 import { env } from 'node:process';
-import { notificationService } from '../utils/notificationService.ts';
-import authMiddleware from '../middlewares/authMiddleware.ts';
-import { validateUserData } from '../middlewares/validation.ts';
-import { AuthRequest } from '../types/index.ts'; 
+import { notificationService } from '../utils/notificationService.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+import { validateUserData } from '../middlewares/validation.js';
+import { AuthRequest } from '../types/index.js'; 
 
 const router = express.Router();
 

@@ -1,9 +1,9 @@
 // services/notificationService.js
 
 import webpush from 'web-push';
-import User from '../models/userModel.ts';
-import Task from '../models/taskModel.ts';
-import Notification from '../models/notificationsModel.ts';
+import User from '../models/userModel.js';
+import Task from '../models/taskModel.js';
+import Notification from '../models/notificationsModel.js';
 import dotenv from 'dotenv';
 dotenv.config();
 

@@ -1,8 +1,8 @@
 import { Request } from 'express';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export interface IUser extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   username: string;
   email: string;
   password: string;
@@ -17,12 +17,12 @@ export interface IUser extends Document {
 }
 
 export interface ITask extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   title: string;
   description?: string;
   deadline: Date;
-  category: string;
-  author: string;
+  category: Types.ObjectId;
+  author: Types.ObjectId;
   completed: boolean;
   notificationsEnabled: boolean;
   createdAt: Date;
@@ -30,21 +30,30 @@ export interface ITask extends Document {
 }
 
 export interface ICategory extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   name: string;
-  author: string;
+  author: Types.ObjectId;
 }
 
 export interface ITaskList extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   name: string;
   description?: string;
-  owner: string;
+  owner: Types.ObjectId;
   sharedWith: Array<{
-    user: string;
+    user: Types.ObjectId;
     permissions: 'read' | 'write';
   }>;
-  tasks: string[];
+  tasks: Types.ObjectId[];
+}
+
+export interface INotification extends Document {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  message: string;
+  type: 'task_reminder' | 'system_message' | 'other';
+  isRead: boolean;
+  createdAt: Date;
 }
 
 export interface AuthRequest extends Request {

@@ -4,9 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
+    "start": "node dist/index.js",
     "dev": "nodemon -x \"npx tsx index.ts\"",
-    "build": "echo 'No build step needed for Vercel'",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

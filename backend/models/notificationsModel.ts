@@ -1,12 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-interface INotification extends Document {
-  userId: string;
-  message: string;
-  type: 'task_reminder' | 'system_message' | 'other';
-  isRead: boolean;
-  createdAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { INotification } from '../types/index.js';
 
 const notificationSchema = new Schema<INotification>({
   userId: { 
@@ -21,7 +14,7 @@ const notificationSchema = new Schema<INotification>({
   type: { 
     type: String, 
     required: true,
-    enum: ['task_reminder', 'system_message', 'other'] // Vous pouvez ajouter d'autres types selon vos besoins
+    enum: ['task_reminder', 'system_message', 'other']
   },
   isRead: { 
     type: Boolean, 

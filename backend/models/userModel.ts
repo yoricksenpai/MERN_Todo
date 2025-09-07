@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from 'bcrypt';
-import { IUser } from '../types/index.ts';
+import { IUser } from '../types/index.js';
 
 const userSchema = new Schema<IUser>({
     username: { type: String, required: true, unique: true },
