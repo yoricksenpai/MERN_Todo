@@ -20,7 +20,7 @@ const allowedOrigins = [
   'http://localhost:5173', 
   'https://mern-todo-iota-six.vercel.app', 
   'https://mern-todo-chi-gold.vercel.app',
-  'https://mern-todo-backend-psi.vercel.app'
+  'https://todo-backend-two-sandy.vercel.app'
 ];
 
 app.use(cors({
@@ -33,6 +33,8 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie']
 }));
 
 // Autres middlewares

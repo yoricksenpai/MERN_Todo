@@ -76,11 +76,15 @@ router.post('/login', async (req: Request, res: Response) => {
         const token = jwt.sign({ userId: userDoc._id }, env.JWT_SECRET);
         console.log('Token generated for user:', username);
         
-        res.cookie('token', token, { httpOnly: true, secure: env.NODE_ENV === 'production' })
-           .json({
-               id: userDoc._id,
-               username: userDoc.username,
-           });
+        res.cookie('token', token, { 
+            httpOnly: true, 
+            secure: env.NODE_ENV === 'production',
+            sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 24 heures
+        }).json({
+            id: userDoc._id,
+            username: userDoc.username,
+        });
         console.log('Login successful for user:', username);
     } catch (err) {
         console.error('Login error:', err);
@@ -90,6 +94,9 @@ router.post('/login', async (req: Request, res: Response) => {
 
 router.get("/profile", async (req: Request, res: Response) => {
   const { token } = req.cookies;
+  console.log('Profile request - cookies:', req.cookies);
+  console.log('Profile request - token:', token ? 'present' : 'missing');
+  
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
@@ -122,7 +129,12 @@ router.get("/profile", async (req: Request, res: Response) => {
 
 // Log out
 router.post('/logout', (req: Request, res: Response) => {
-    res.cookie('token', '').json('ok');
+    res.cookie('token', '', {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+        expires: new Date(0)
+    }).json('ok');
 })
 
 export default router;
